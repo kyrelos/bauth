@@ -1,0 +1,61 @@
+{% load staticfiles %}
+<!doctype html>
+<!--[if lt IE 7]> <html class="ie6 oldie"> <![endif]-->
+<!--[if IE 7]>    <html class="ie7 oldie"> <![endif]-->
+<!--[if IE 8]>    <html class="ie8 oldie"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="">
+<!--<![endif]-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify | Phone</title>
+<link href="{{STATIC_URL}}boilerplate.css" rel="stylesheet" type="text/css">
+<link href="{{STATIC_URL}}cards.css" rel="stylesheet" type="text/css">
+<link href="{{STATIC_URL}}jQueryAssets/jquery.ui.core.min.css" rel="stylesheet" type="text/css">
+<link href="{{STATIC_URL}}jQueryAssets/jquery.ui.theme.min.css" rel="stylesheet" type="text/css">
+<link href="{{STATIC_URL}}jQueryAssets/jquery.ui.button.min.css" rel="stylesheet" type="text/css">
+<!-- 
+To learn more about the conditional comments around the html tags at the top of the file:
+paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/
+
+Do the following if you're using your customized build of modernizr (http://www.modernizr.com/):
+* insert the link to your js here
+* remove the link below to the html5shiv
+* add the "no-js" class to the html tags at the top
+* you can also remove the link to respond.min.js if you included the MQ Polyfill in your modernizr build 
+-->
+<!--[if lt IE 9]>
+<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<script src="{{STATIC_URL}}respond.min.js"></script>
+<script src="{{STATIC_URL}}jQueryAssets/jquery-1.8.3.min.js" type="text/javascript"></script>
+<script src="{{STATIC_URL}}jQueryAssets/jquery-ui-1.9.2.button.custom.min.js" type="text/javascript"></script>
+</head>
+<body>
+	<div class="gridContainer clearfix"><figure id="banner" class="fluid"><img
+			src="{{STATIC_URL}}img/background.jpg" alt=""/></figure>
+		<div id="div1" class="fluid">Welcome</div>
+        <div id="div2" class="fluid">
+        <form id="form-div" class="fluid" method="post" action=".">{% csrf_token %}
+        	<fieldset>
+            	<label>Token</label>
+            	<input id='id_token' type="text" required name="token" value="{{form.token.value}}">
+				<label class="error_class">{{form.token.errors.as_text}}</label>
+            </fieldset>
+			<fieldset id="submit_but">
+          		<button type="submit" id="Button1">SUBMIT</button>
+            </fieldset>
+
+			{{ form.errors }}
+			{{ form.non_field_errors }}
+        </form>
+            
+      </div>
+	</div>
+	<script type="text/javascript">
+		$(function () {
+			$("#Button1").button();
+		});
+	</script>
+</body>
+</html>
