@@ -7,7 +7,7 @@ ALLOWED_HOSTS = ['*']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'cards_web',
+        'NAME': 'bauth',
         'USER': 'postgres',
         'ADMINUSER':'postgres',
         'PASSWORD': 'C7TS*+dp~-9JHwb*7rzP',

@@ -6,7 +6,7 @@ ALLOWED_HOSTS = ['*']
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',#'django.db.backends.postgresql_psycopg2',
-        'NAME': 'kenblest-geodjango',
+        'NAME': 'bauth',
         'USER': 'postgres',
         'ADMINUSER':'postgres',
         'PASSWORD': 'C7TS*+dp~-9JHwb*7rzP',

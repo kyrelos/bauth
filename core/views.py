@@ -103,12 +103,12 @@ def register_page(request):
             account.set_password(form.cleaned_data['password'])
             token = str(random.randint(0, 1000000))
             MyToken.objects.create(token=token, account=account)
-
+            account.active_session_key = request.session.session_key
+            account.save()
             tasks.send_message.apply_async(countdown=1, args=[token])
             user = authenticate(email=form.cleaned_data['email'], password=form.cleaned_data['password'])
             auth_login(request, user)
-            account.active_session_key = request.session.session_key
-            account.save()
+
             return HttpResponseRedirect('/verify_phone/')
         else:
             return render(request, 'core/register.html', {'form': form})
