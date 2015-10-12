@@ -1,4 +1,3 @@
-
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib.auth import authenticate
@@ -24,6 +23,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
 from django.contrib.sessions.models import Session
+
 
 @sensitive_post_parameters()
 @csrf_protect
@@ -80,6 +80,7 @@ def login(request, template_name='registration/login.html',
 
     return TemplateResponse(request, template_name, context)
 
+
 def index_page(request):
     if request.method == 'POST':
         form = LeadForm(request.POST)
@@ -114,6 +115,7 @@ def register_page(request):
             return render(request, 'core/register.html', {'form': form})
 
     return render(request, 'core/register.html', {})
+
 
 @login_required(login_url='/accounts/login/')
 def verify_page(request):
