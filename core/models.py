@@ -97,7 +97,6 @@ class Lead(models.Model):
 class MyToken(models.Model):
     token = models.CharField(max_length=64)
     account = models.ForeignKey(Account)
-
     def __unicode__(self):
         return '{0}:{1}'.format(self.account, self.token)
 

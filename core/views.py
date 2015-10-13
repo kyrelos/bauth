@@ -102,11 +102,17 @@ def register_page(request):
                                              first_name=form.cleaned_data['first_name'],
                                              last_name=form.cleaned_data['last_name'])
             account.set_password(form.cleaned_data['password'])
-            token = str(random.randint(0, 1000000))
-            MyToken.objects.create(token=token, account=account)
+            phone_token = str(random.randint(0, 1000000))
+            email_token = request.session.session_key[10:] + phone_token
+            MyToken.objects.create(token=phone_token, account=account)
+            MyToken.objects.create(token=email_token, account=account)
             account.active_session_key = request.session.session_key
             account.save()
-            tasks.send_message.apply_async(countdown=1, args=[token])
+            tasks.send_message.apply_async(countdown=1, args=[phone_token])
+            tasks.send_message.apply_async(countdown=2, args=[email_token,
+                                                              request.get_host + '/verify_email/?token={0}'.format(
+                                                                  email_token)])
+
             user = authenticate(email=form.cleaned_data['email'], password=form.cleaned_data['password'])
             auth_login(request, user)
 
@@ -134,3 +140,28 @@ def verify_page(request):
             return render(request, 'core/verify_phone.html', {'form': form})
     else:
         return render(request, 'core/verify_phone.html', {})
+
+
+# @login_required(login_url='/accounts/login/')
+def verify_email(request):
+    if request.method == 'GET':
+        email_token = request.GET.get('token')
+        if email_token:
+            try:
+                token = MyToken.objects.get(token=email_token)
+                account = token.account
+                if not account.is_email_validated:
+                    account.is_email_validated = True
+                account.save()
+                token.delete()
+                return HttpResponseRedirect('/accounts/login/')
+            except ObjectDoesNotExist as e:
+                logger.exception('email_token_not_found', exception=e.message)
+            except MultipleObjectsReturned as e:
+                MyToken.objects.filter(token=email_token).delete()
+                logger.exception('email_token_duplicate', exception=e.message)
+                return HttpResponseRedirect('/')
+        else:
+            return HttpResponseRedirect('/')
+    else:
+        return HttpResponse(status=405)

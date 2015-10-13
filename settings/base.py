@@ -36,9 +36,12 @@ TEMPLATE_DEBUG = DEBUG
 ALLOWED_HOSTS = []
 
 ADMINS = (
-    ('kyrelos obat', 'kalosobat@gmail,com'),
-
+    ('kyrelos obat', 'kalosobat@gmail,com')
 )
+
+MANDRILL_API_KEY = "5z41OJGKZFSJX0RG1szpwQ"
+EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
+DEFAULT_FROM_EMAIL = "noreply@bauth.com"
 
 # Application definition
 DEFAULT_APPS = (
@@ -50,6 +53,7 @@ DEFAULT_APPS = (
     'django.contrib.staticfiles',
     'dbbackup',
     'rest_framework',
+
 )
 
 THIRD_PARTY_APPS = (
@@ -61,6 +65,7 @@ LOCAL_APPS = (
     'import_export',
     'suit',
     'twilio',
+    'djrill',
 
 )
 
@@ -164,7 +169,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
 
-# MEDIA_URL = 'https://{0}/kenblest/kenblestkenya/attachments/'.format(conn.server_name())
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
