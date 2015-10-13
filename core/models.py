@@ -77,23 +77,6 @@ class Account(AbstractBaseUser):
         return self.is_phone_validated and self.is_email_validated
 
 
-class Lead(models.Model):
-    first_name = models.CharField(max_length=100, blank=True, null=True)
-    last_name = models.CharField(max_length=100, blank=True, null=True)
-    occupation = models.CharField(max_length=100, blank=True, null=True)
-    monthly_income = models.CharField(max_length=100, blank=True, null=True)
-    phone = models.CharField(max_length=100, blank=True, null=True, unique=True)
-    email = models.EmailField(max_length=100, blank=True, null=True, unique=True)
-    county = models.CharField(max_length=100, blank=True, null=True)
-    nearest_town = models.CharField(max_length=100, blank=True, null=True)
-
-    def __unicode__(self):
-        return '{0}:{1}'.format(self.first_name, self.phone)
-
-    class Meta:
-        verbose_name = 'Lead'
-        verbose_name_plural = 'Leads'
-
 class MyToken(models.Model):
     token = models.CharField(max_length=64)
     account = models.ForeignKey(Account)
@@ -109,13 +92,5 @@ class MyToken(models.Model):
 
 
 
-def convert_empty_to_none(sender, *args, **kwargs):
-    instance = kwargs['instance']
-    if instance.email == '':
-        instance.email = None
-    else:
-        pass
 
-
-pre_save.connect(convert_empty_to_none, sender=Lead, dispatch_uid="convert empty strings to None")
 

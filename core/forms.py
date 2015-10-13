@@ -7,11 +7,6 @@ from structlog import get_logger
 
 logger = get_logger('core')
 
-class LeadForm(forms.ModelForm):
-    class Meta:
-        model = Lead
-        fields = '__all__'
-
 
 class RegisterForm(forms.Form):
     first_name = forms.CharField()

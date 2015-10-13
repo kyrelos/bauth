@@ -83,17 +83,6 @@ def login(request, template_name='registration/login.html',
     return TemplateResponse(request, template_name, context)
 
 
-def index_page(request):
-    if request.method == 'POST':
-        form = LeadForm(request.POST)
-        if form.is_valid():
-            Lead.objects.create(**form.cleaned_data)
-        else:
-            return render(request, 'core/index.html', {'form': form})
-
-    return render(request, 'core/index.html', {})
-
-
 def register_page(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -153,7 +142,6 @@ def verify_page(request):
             return render(request, 'core/verify_phone.html', {})
 
 
-# @login_required(login_url='/accounts/login/')
 def verify_email(request):
     if request.method == 'GET':
         email_token = request.GET.get('token')
