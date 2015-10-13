@@ -1,6 +1,8 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib.auth import authenticate
+import uuid
+
 
 from core.models import *
 from core.forms import *
@@ -103,14 +105,14 @@ def register_page(request):
                                              last_name=form.cleaned_data['last_name'])
             account.set_password(form.cleaned_data['password'])
             phone_token = str(random.randint(0, 1000000))
-            email_token = request.session.session_key[10:] + phone_token
+            email_token = uuid.uuid1()
             MyToken.objects.create(token=phone_token, account=account)
             MyToken.objects.create(token=email_token, account=account)
             account.active_session_key = request.session.session_key
             account.save()
             tasks.send_message.apply_async(countdown=1, args=[phone_token])
-            tasks.send_message.apply_async(countdown=2, args=[email_token,
-                                                              request.get_host + '/verify_email/?token={0}'.format(
+            tasks.send_email.apply_async(countdown=2, args=[email_token,
+                                                              request.get_host() + '/verify_email/?token={0}'.format(
                                                                   email_token)])
 
             user = authenticate(email=form.cleaned_data['email'], password=form.cleaned_data['password'])
