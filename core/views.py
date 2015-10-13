@@ -36,6 +36,14 @@ def login(request, template_name='registration/login.html',
           current_app=None, extra_context=None):
     """
     Displays the login form and handles the login action.
+
+    :param request:
+    :param template_name:
+    :param redirect_field_name:
+    :param authentication_form:
+    :param current_app:
+    :param extra_context:
+    :return: HttpResponse
     """
     redirect_to = request.POST.get(redirect_field_name,
                                    request.GET.get(redirect_field_name, ''))
@@ -84,6 +92,13 @@ def login(request, template_name='registration/login.html',
 
 
 def register_page(request):
+    """
+    A view Register new users
+
+    :param request:
+    :return: HttpResponse
+    """
+
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -115,6 +130,12 @@ def register_page(request):
 
 @login_required(login_url='/accounts/login/')
 def verify_page(request):
+    """
+    A view to handle token validation
+
+    :param request:
+    :return: HttpResponse
+    """
     if request.user.is_verified and request.user.secondary_auth:
         return HttpResponseRedirect('/')
     else:
@@ -143,6 +164,12 @@ def verify_page(request):
 
 
 def verify_email(request):
+    """
+    A view to verify email address
+
+    :param request:
+    :return: HttpResponse
+    """
     if request.method == 'GET':
         email_token = request.GET.get('token')
         if email_token:
@@ -176,6 +203,12 @@ def verify_email(request):
 
 @login_required(login_url='/accounts/login/')
 def regenrate_token(request):
+    """
+    A view to regenerate tokens
+
+    :param request:
+    :return: HttpResponse
+    """
     if request.method == 'GET':
         token_type = request.GET.get('type')
         if token_type == 'email':

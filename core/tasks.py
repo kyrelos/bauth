@@ -33,6 +33,11 @@ def restore_db():
 
 @shared_task
 def send_message(token):
+    """
+    Send SMS message
+    :param token:
+    :return:
+    """
     try:
         client.messages.create(
             body=token,
@@ -46,6 +51,13 @@ def send_message(token):
 
 @shared_task
 def send_email(token, url):
+    """
+    Send Email
+
+    :param token:
+    :param url:
+    :return:
+    """
     body = 'To verify your email and complete your Registration click {0}'.format(url)
     try:
         send_mail('Email Verification',
