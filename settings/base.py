@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 from celery.schedules import crontab
 from django.conf import global_settings
 import os
+import structlog
+from loglib.logging import KeyValueRenderer
+
 
 # from datetime import timedelta
 
@@ -22,6 +25,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'vru*rm0#in7sbox-+u=f#hbd*%#-uw!&x3p)!s*z=d6e7vq&6y'
+
+TWILIO_PHONE_NUMBER = "+17315060403"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -201,8 +206,22 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True
         },
+        'core': {
+            'handlers': ['console', 'sentry'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
     }
 }
+
+# Set up structured logging
+structlog.configure(
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    processors=[
+        structlog.processors.UnicodeEncoder(),
+        KeyValueRenderer(),
+    ]
+)
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',

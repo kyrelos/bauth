@@ -9,7 +9,6 @@ class LeadAdmin(admin.ModelAdmin):
 class AccountAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
-        # import pdb; pdb.set_trace()
         obj.set_password(form.cleaned_data['password'])
         obj.save()
 

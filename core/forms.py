@@ -2,6 +2,10 @@ __author__ = 'princek'
 from django import forms
 from core.models import *
 from django.core.exceptions import ValidationError, ObjectDoesNotExist, MultipleObjectsReturned
+from structlog import get_logger
+
+
+logger = get_logger('core')
 
 class LeadForm(forms.ModelForm):
     class Meta:
@@ -73,16 +77,13 @@ class VerifyPhoneForm(forms.Form):
             try:
                 MyToken.objects.get(token=token)
                 return token
-            except (ObjectDoesNotExist):
+            except ObjectDoesNotExist as e:
+                logger.exception('token_not_found', exception=e.message)
                 raise forms.ValidationError('Token Not Found')
-            except (MultipleObjectsReturned):
+            except MultipleObjectsReturned as e:
                 MyToken.objects.filter(token=token).delete()
+                logger.exception('duplicate_tokens', exception=e.message)
                 raise forms.ValidationError('Duplicate Token')
 
         raise forms.ValidationError('This field is required')
 
-# class CustomerSignUpForm(forms.Form):
-#     username = forms.CharField()
-#     email = forms.EmailField()
-#     password = forms.Password()
-#     phone = forms.CharField()

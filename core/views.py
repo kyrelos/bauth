@@ -121,10 +121,6 @@ def register_page(request):
 def verify_page(request):
     if request.method == 'POST':
         form = VerifyPhoneForm(request.POST)
-        # try:
-        #     token = MyToken.objects.get(session_key=request.session.session_key)
-        # except ObjectDoesNotExist:
-
         if form.is_valid():
             token = MyToken.objects.get(token=form.cleaned_data['token'])
             account = token.account
