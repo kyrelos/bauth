@@ -8,8 +8,6 @@ class AccountManager(BaseUserManager):
     def create_user(self, email, password=None, **kwargs):
         if not email:
             raise ValueError('Users must have a valid email address.')
-        # if not phone:
-        #     raise ValueError('Users must have a valid phone number.')
 
         if not kwargs.get('username'):
             raise ValueError('Users must have a valid username.')
@@ -17,7 +15,6 @@ class AccountManager(BaseUserManager):
         account = self.model(
             email=self.normalize_email(email),
             username=kwargs.get('username'),
-            # phone=self.phone
         )
 
         account.set_password(password)
@@ -42,7 +39,6 @@ class Account(AbstractBaseUser):
     first_name = models.CharField(max_length=40, blank=True)
     last_name = models.CharField(max_length=40, blank=True)
     phone = models.CharField(max_length=20, unique=True)
-
 
     is_staff = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
@@ -76,6 +72,10 @@ class Account(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return self.is_admin
 
+    @property
+    def is_verified(self):
+        return self.is_phone_validated and self.is_email_validated
+
 
 class Lead(models.Model):
     first_name = models.CharField(max_length=100, blank=True, null=True)
@@ -97,23 +97,14 @@ class Lead(models.Model):
 class MyToken(models.Model):
     token = models.CharField(max_length=64)
     account = models.ForeignKey(Account)
+
     def __unicode__(self):
         return '{0}:{1}'.format(self.account, self.token)
 
     class Meta:
-        verbose_name = 'Lead'
-        verbose_name_plural = 'Leads'
+        verbose_name = 'Auth Token'
+        verbose_name_plural = 'Auth Tokens'
 
-# class Customer(models.Model):
-#     user = models.OneToOneField(Account, primary_key=True)
-#     phone = models.CharField(max_length=100, blank=True, null=True)
-#
-#     def __unicode__(self):
-#         return '{0}'.format(self.user.username)
-#
-#     class Meta:
-#         verbose_name = 'Customer'
-#         verbose_name_plural = 'Customers'
 
 
 

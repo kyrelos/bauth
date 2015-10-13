@@ -11,7 +11,7 @@ import random
 from django.conf import settings
 # Avoid shadowing the login() and logout() views below.
 from django.contrib.auth import (
-    REDIRECT_FIELD_NAME, login as auth_login,
+    REDIRECT_FIELD_NAME, login as auth_login, logout
 )
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import (
@@ -111,10 +111,9 @@ def register_page(request):
             account.active_session_key = request.session.session_key
             account.save()
             tasks.send_message.apply_async(countdown=1, args=[phone_token])
-            tasks.send_email.apply_async(countdown=2, args=[email_token,
+            tasks.send_email.apply_async(countdown=1, args=[email_token,
                                                               request.get_host() + '/verify_email/?token={0}'.format(
                                                                   email_token)])
-
             user = authenticate(email=form.cleaned_data['email'], password=form.cleaned_data['password'])
             auth_login(request, user)
 
@@ -127,21 +126,31 @@ def register_page(request):
 
 @login_required(login_url='/accounts/login/')
 def verify_page(request):
-    if request.method == 'POST':
-        form = VerifyPhoneForm(request.POST)
-        if form.is_valid():
-            token = MyToken.objects.get(token=form.cleaned_data['token'])
-            account = token.account
-            if not account.is_phone_validated:
-                account.is_phone_validated = True
-            account.secondary_auth = True
-            account.save()
-            token.delete()
-            return HttpResponseRedirect('/')
-        else:
-            return render(request, 'core/verify_phone.html', {'form': form})
+    if request.user.is_verified and request.user.secondary_auth:
+        return HttpResponseRedirect('/')
     else:
-        return render(request, 'core/verify_phone.html', {})
+        if request.method == 'POST':
+            form = VerifyPhoneForm(request.POST)
+            if form.is_valid():
+                token = MyToken.objects.get(token=form.cleaned_data['token'])
+                account = token.account
+                if account == request.user:
+                    if not account.is_phone_validated:
+                        account.is_phone_validated = True
+                    account.secondary_auth = True
+                    account.save()
+                    token.delete()
+                    if account.is_verified:
+                        return HttpResponseRedirect('/')
+                    else:
+                        return render(request, 'core/verify_phone.html', {'form': form})
+                else:
+                    form.add_error('token', ValidationError('Token Invalid'))
+                    return render(request, 'core/verify_phone.html', {'form': form})
+            else:
+                return render(request, 'core/verify_phone.html', {'form': form})
+        else:
+            return render(request, 'core/verify_phone.html', {})
 
 
 # @login_required(login_url='/accounts/login/')
@@ -154,16 +163,47 @@ def verify_email(request):
                 account = token.account
                 if not account.is_email_validated:
                     account.is_email_validated = True
-                account.save()
+                    account.save()
                 token.delete()
-                return HttpResponseRedirect('/accounts/login/')
+                if request.user == account:
+                    return HttpResponseRedirect('/verify_phone/')
+                else:
+                    try:
+                        logout(request)
+                        Session.objects.get(session_key=account.active_session_key).delete()
+                    except ObjectDoesNotExist:
+                        pass
+                    return HttpResponseRedirect('/verify_phone/')
             except ObjectDoesNotExist as e:
                 logger.exception('email_token_not_found', exception=e.message)
+                return HttpResponseRedirect('/verify_phone/')
             except MultipleObjectsReturned as e:
                 MyToken.objects.filter(token=email_token).delete()
                 logger.exception('email_token_duplicate', exception=e.message)
-                return HttpResponseRedirect('/')
+                return HttpResponseRedirect('/regenerate_token/?type=email')
         else:
             return HttpResponseRedirect('/')
+    else:
+        return HttpResponse(status=405)
+
+@login_required(login_url='/accounts/login/')
+def regenrate_token(request):
+    if request.method == 'GET':
+        token_type = request.GET.get('type')
+        if token_type == 'email':
+            email_token = uuid.uuid1()
+            MyToken.objects.create(token=email_token, account=request.user)
+            tasks.send_email.apply_async(countdown=1, args=[email_token,
+                                                          request.get_host() + '/verify_email/?token={0}'.format(
+                                                              email_token)])
+        elif token_type == 'phone':
+            phone_token = str(random.randint(0, 1000000))
+            MyToken.objects.create(token=phone_token, account=request.user)
+            tasks.send_message.apply_async(countdown=1, args=[phone_token])
+
+        else:
+            pass
+
+        return HttpResponseRedirect('/verify_phone/')
     else:
         return HttpResponse(status=405)
