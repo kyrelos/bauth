@@ -102,6 +102,7 @@ def register_page(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
+            # import pdb;pdb.set_trace()
             account = Account.objects.create(email=form.cleaned_data['email'],
                                              phone=form.cleaned_data['phone'],
                                              username=form.cleaned_data['username'],
