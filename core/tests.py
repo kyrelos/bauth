@@ -8,6 +8,7 @@ from django.test import Client
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from core.models import *
+from core.forms import *
 import re
 
 
@@ -21,11 +22,11 @@ class SimpleTest(TestCase):
 
 class AccountTest(TestCase):
     def setUp(self):
-        a=Account.objects.create(email='admin@admin.com',
-                               phone='0723123345',
-                               username='admin',
-                               first_name='tom',
-                               last_name='hanks')
+        a = Account.objects.create(email='admin@admin.com',
+                                   phone='0723123345',
+                                   username='admin',
+                                   first_name='tom',
+                                   last_name='hanks')
         a.set_password('admin')
         a.save()
 
@@ -53,9 +54,10 @@ class AccountTest(TestCase):
         r3 = client.post('/register/',
                          data={'username': 'obat', 'password': 'obat', 'first_name': 'obat', 'last_name': 'obat',
                                'phone': '88776', 'email': 'obat@email.com', 'confirm_password': 'obat'})
-        self.assertRegexpMatches(str(r3.context['form'].errors), re.escape("Phone number already exists"))
-        self.assertRegexpMatches(str(r3.context['form'].errors), re.escape("Username already exists"))
-        self.assertRegexpMatches(str(r3.context['form'].errors), re.escape("Email Address already exists"))
+        self.assertEqual(r3.context['form'].errors, {'username': [u'Username already exists'],
+                                                     'phone': [u'Phone number already exists'],
+                                                     'email': [u'Email Address already exists']
+                                                     })
 
     def test_login_page(self):
         client = Client()
@@ -69,7 +71,9 @@ class AccountTest(TestCase):
         r3 = client.post('/accounts/login/',
                          data={'username': 'dave@email.com', 'password': 'dave', 'next': '/verify_phone/'})
         self.assertEqual(r3.status_code, 200)
-        self.assertRegexpMatches(str(r3.context['form'].errors), re.escape("Please enter a correct email and password. Note that both fields may be case-sensitive."))
+        # import pdb;pdb.set_trace()
+        self.assertEqual(r3.context['form'].errors, {'__all__': [u'Please enter a correct email and password. '
+                                                                 u'Note that both fields may be case-sensitive.']})
 
     def test_verify_page(self):
         client = Client()
@@ -94,7 +98,60 @@ class AccountTest(TestCase):
         self.assertEqual(len(MyToken.objects.all()), 0)
         account.is_email_validated = True
         account.save()
-        import pdb;pdb.set_trace()
+        # import pdb;pdb.set_trace()
         r6 = client.get('/verify_phone/')
         self.assertEqual(r6.status_code, 302)
         self.assertRegexpMatches(str(r6), re.escape("http://testserver/"))
+
+    def test_auth_login(self):
+        client = Client()
+        r = client.login(username='admin@admin.com', password='admin')
+        self.assertTrue(r)
+
+    def test_registration_form(self):
+        form = RegisterForm({'username': 'mary',
+                             'password': 'mary',
+                             'confirm_password': 'mary',
+                             'phone': '9999',
+                             'email': 'mary@email.com',
+                             'first_name': 'Mary',
+                             'last_name': 'Jane'})
+        self.assertTrue(form.is_valid())
+        self.assertEqual(len(form.errors), 0)
+
+        form2 = RegisterForm({})
+        self.assertFalse(form2.is_valid())
+        self.assertEqual(form2.errors, {'username': [u'This field is required.'],
+                                        'confirm_password': [u'This field is required.'],
+                                        'first_name': [u'This field is required.'],
+                                        'last_name': [u'This field is required.'],
+                                        'phone': [u'This field is required.'],
+                                        'password': [u'This field is required.'],
+                                        'email': [u'This field is required.']})
+
+        form3 = RegisterForm({'username': 'mary',
+                              'password': 'mary',
+                              'confirm_password': 'mary',
+                              'phone': '0723123345',
+                              'email': 'admin@admin.com',
+                              'first_name': 'Mary',
+                              'last_name': 'Jane'})
+        self.assertFalse(form3.is_valid())
+        self.assertEqual(form3.errors, {'phone': [u'Phone number already exists'],
+                                        'email': [u'Email Address already exists']})
+
+    def test_token_form(self):
+        form = VerifyPhoneForm({'token': '903390'})
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors, {'token': [u'Token Not Found']})
+        MyToken.objects.create(token='903390', account=Account.objects.get(username='admin'))
+        form2 = VerifyPhoneForm({'token': '903390'})
+        self.assertTrue(form2.is_valid())
+
+        MyToken.objects.create(token='903390', account=Account.objects.get(username='admin'))
+        form3 = VerifyPhoneForm({'token': '903390'})
+        self.assertEqual(form3.errors, {'token': [u'Duplicate Token']})
+        self.assertEqual(len(MyToken.objects.all()), 0)
+        form4 = VerifyPhoneForm({})
+        self.assertFalse(form4.is_valid())
+        self.assertEqual(form4.errors, {'token': [u'This field is required.']})
