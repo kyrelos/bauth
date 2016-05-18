@@ -1,0 +1,96 @@
+{% load staticfiles %}
+<!doctype html>
+<!--[if lt IE 7]> <html class="ie6 oldie"> <![endif]-->
+<!--[if IE 7]>    <html class="ie7 oldie"> <![endif]-->
+<!--[if IE 8]>    <html class="ie8 oldie"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="">
+<!--<![endif]-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AFB CARDS | LEAD</title>
+<link href="{{STATIC_URL}}boilerplate.css" rel="stylesheet" type="text/css">
+<link href="{{STATIC_URL}}cards.css" rel="stylesheet" type="text/css">
+<link href="{{STATIC_URL}}jQueryAssets/jquery.ui.core.min.css" rel="stylesheet" type="text/css">
+<link href="{{STATIC_URL}}jQueryAssets/jquery.ui.theme.min.css" rel="stylesheet" type="text/css">
+<link href="{{STATIC_URL}}jQueryAssets/jquery.ui.button.min.css" rel="stylesheet" type="text/css">
+<!-- 
+To learn more about the conditional comments around the html tags at the top of the file:
+paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/
+
+Do the following if you're using your customized build of modernizr (http://www.modernizr.com/):
+* insert the link to your js here
+* remove the link below to the html5shiv
+* add the "no-js" class to the html tags at the top
+* you can also remove the link to respond.min.js if you included the MQ Polyfill in your modernizr build 
+-->
+<!--[if lt IE 9]>
+<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<script src="{{STATIC_URL}}respond.min.js"></script>
+<script src="{{STATIC_URL}}jQueryAssets/jquery-1.8.3.min.js" type="text/javascript"></script>
+<script src="{{STATIC_URL}}jQueryAssets/jquery-ui-1.9.2.button.custom.min.js" type="text/javascript"></script>
+</head>
+<body>
+	<div class="gridContainer clearfix"><figure id="banner" class="fluid"><img
+			src="{{STATIC_URL}}img/background.jpg" alt=""/></figure>
+		<div id="div1" class="fluid">Welcome</div>
+        <div id="div2" class="fluid">
+        <form id="form-div" class="fluid" method="post" action=".">{% csrf_token %}
+        	<fieldset>
+            	<label>First Name</label>
+            	<input id='id_first_name' type="text" required name="first_name" value="{{form.first_name.value}}">
+				<label class="error_class">{{form.first_name.errors.as_text}}</label>
+            </fieldset>
+            <fieldset>
+            	<label>Last Name</label>
+            	<input id='id_last_name' name="last_name" type="text" required value="{{form.last_name.value}}">
+				<label class="error_class">{{form.last_name.errors.as_text}}</label>
+            </fieldset>
+            <fieldset>
+            	<label>Occupation</label>
+            	<input id='id_occupation' name="occupation" type="text" required value="{{form.occupation.value}}">
+				<label class="error_class">{{form.occupation.errors.as_text}}</label>
+            </fieldset>
+            <fieldset>
+            	<label>Monthly Income</label>
+            	<input id='monthly_income' name="monthly_income" type="text" required
+					   value="{{form.monthly_income.value}}">
+				<label class="error_class">{{form.monthly_income.errors.as_text}}</label>
+            </fieldset>
+            <fieldset>
+            	<label>Phone Number </label>
+            	<input id='id_phone' name="phone" type="text" required value="{{form.phone.value}}">
+				<label class="error_class">{{form.phone.errors.as_text}}</label>
+
+            </fieldset>
+            <fieldset>
+            	<label>Email</label>
+            	<input id='id_email' name="email" type="email" value="{{form.email.value}}">
+				<label class="error_class">{{form.email.errors.as_text}}</label>
+            </fieldset>
+            <fieldset>
+            	<label>County</label>
+            	<input id='id_county' name="county" type="text" value="{{form.county.value}}">
+				<label class="error_class">{{form.county.errors.as_text}}</label>
+            </fieldset>
+            <fieldset>
+            	<label>Nearest Town</label>
+            	<input id='id_nearest_town' name="nearest_town" type="text" required
+					   value="{{form.nearest_town.value}}">
+				<label class="error_class">{{form.nearest_town.errors.as_text}}</label>
+            </fieldset>
+          	<fieldset id="submit_but">
+          		<button type="submit" id="Button1">SUBMIT</button>
+            </fieldset>
+        </form>
+            
+      </div>
+	</div>
+<script type="text/javascript">
+$(function() {
+	$( "#Button1" ).button(); 
+});
+    </script>
+</body>
+</html>
